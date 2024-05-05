@@ -17,6 +17,7 @@ import static org.eclipse.jgit.transport.SshConstants.PUBKEY_ACCEPTED_ALGORITHMS
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StreamCorruptedException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -356,12 +357,9 @@ public class JGitPublicKeyAuthentication extends UserAuthPublicKey {
 				// not derived
 				if (!isDerived) {
 					log.warn("{}", //$NON-NLS-1$
-						format(SshdText.get().cannotReadPublicKey, keyFile));
+							format(SshdText.get().cannotReadPublicKey, keyFile));
 				}
-			} catch (InvalidPathException | IOException e) {
-				log.warn("{}", //$NON-NLS-1$
-						format(SshdText.get().cannotReadPublicKey, keyFile), e);
-			} catch (GeneralSecurityException e) {
+			} catch (GeneralSecurityException | StreamCorruptedException e) {
 				// ignore in case this is not a derived key path, as in most
 				// cases this specifies a private key
 				if (isDerived) {
@@ -369,6 +367,9 @@ public class JGitPublicKeyAuthentication extends UserAuthPublicKey {
 							format(SshdText.get().cannotReadPublicKey, keyFile),
 							e);
 				}
+			} catch (InvalidPathException | IOException e) {
+				log.warn("{}", //$NON-NLS-1$
+						format(SshdText.get().cannotReadPublicKey, keyFile), e);
 			}
 			return null;
 		}
